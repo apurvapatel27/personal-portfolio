@@ -1,0 +1,137 @@
+[
+  {
+    "name": "arrow",
+    "src": "/vox/arrow.webp",
+    "format": "webp",
+    "kind": "mask",
+    "width": 1200,
+    "height": 455,
+    "bytes": 19086
+  },
+  {
+    "name": "circle",
+    "src": "/vox/circle.webp",
+    "format": "webp",
+    "kind": "mask",
+    "width": 1200,
+    "height": 438,
+    "bytes": 33406
+  },
+  {
+    "name": "highlighter",
+    "src": "/vox/highlighter.webp",
+    "format": "webp",
+    "kind": "mask",
+    "width": 1200,
+    "height": 120,
+    "bytes": 31654
+  },
+  {
+    "name": "map",
+    "src": "/vox/map.webp",
+    "format": "webp",
+    "kind": "image",
+    "width": 1200,
+    "height": 675,
+    "bytes": 265846
+  },
+  {
+    "name": "me-cutout-560",
+    "src": "/vox/me-cutout-560.avif",
+    "format": "avif",
+    "kind": "object",
+    "width": 560,
+    "height": 700,
+    "bytes": 75603
+  },
+  {
+    "name": "me-cutout-560",
+    "src": "/vox/me-cutout-560.webp",
+    "format": "webp",
+    "kind": "object",
+    "width": 560,
+    "height": 700,
+    "bytes": 110488
+  },
+  {
+    "name": "me-cutout",
+    "src": "/vox/me-cutout.avif",
+    "format": "avif",
+    "kind": "object",
+    "width": 900,
+    "height": 1125,
+    "bytes": 157961
+  },
+  {
+    "name": "me-cutout",
+    "src": "/vox/me-cutout.webp",
+    "format": "webp",
+    "kind": "object",
+    "width": 900,
+    "height": 1125,
+    "bytes": 250712
+  },
+  {
+    "name": "paper",
+    "src": "/vox/paper.webp",
+    "format": "webp",
+    "kind": "texture",
+    "width": 1024,
+    "height": 1024,
+    "bytes": 58548
+  },
+  {
+    "name": "pin",
+    "src": "/vox/pin.webp",
+    "format": "webp",
+    "kind": "object",
+    "width": 367,
+    "height": 744,
+    "bytes": 25304
+  },
+  {
+    "name": "stamp",
+    "src": "/vox/stamp.webp",
+    "format": "webp",
+    "kind": "mask",
+    "width": 1200,
+    "height": 312,
+    "bytes": 43594
+  },
+  {
+    "name": "tape-1",
+    "src": "/vox/tape-1.webp",
+    "format": "webp",
+    "kind": "object",
+    "width": 800,
+    "height": 148,
+    "bytes": 69438
+  },
+  {
+    "name": "tape-2",
+    "src": "/vox/tape-2.webp",
+    "format": "webp",
+    "kind": "object",
+    "width": 800,
+    "height": 164,
+    "bytes": 81412
+  },
+  {
+    "name": "tape-3",
+    "src": "/vox/tape-3.webp",
+    "format": "webp",
+    "kind": "object",
+    "width": 800,
+    "height": 119,
+    "bytes": 57632
+  },
+  {
+    "name": "torn",
+    "src": "/vox/torn.webp",
+    "format": "webp",
+    "kind": "mask",
+    "width": 1200,
+    "height": 202,
+    "bytes": 70182
+  }
+]

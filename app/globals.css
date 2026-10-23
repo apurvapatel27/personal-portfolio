@@ -1,0 +1,421 @@
+@import "tailwindcss";
+
+/* ================================================================== */
+/* Design tokens                                                       */
+/* ================================================================== */
+
+@theme static {
+  /* Paper & ink */
+  --color-paper: #fbf6ec;
+  --color-paper-deep: #f1e8d6;
+  --color-ink: #1c1917;
+  --color-ink-soft: #57514a;
+
+  /* Crayon set: full colours are fills only (ink text on top). */
+  --color-yellow: #ffd23f;
+  --color-orange: #ff8b3d;
+  --color-pink: #ff9fcb;
+  --color-blue: #72b8ff;
+  --color-green: #4cc277;
+  --color-mint: #9fe9cc;
+  /* Marker red: circles, arrows, string and stamps (strokes and large text only) */
+  --color-red: #e5383b;
+
+  /* Light tints for big card backgrounds */
+  --color-yellow-tint: #fff2c4;
+  --color-orange-tint: #ffe3cf;
+  --color-pink-tint: #ffe4f0;
+  --color-blue-tint: #deeeff;
+  --color-green-tint: #d9f3e2;
+  --color-mint-tint: #dbf7ec;
+
+  /* Deep crayons: safe for text on paper, white and every tint (AA) */
+  --color-orange-deep: #b3430a;
+  --color-blue-deep: #1d5ca6;
+  --color-green-deep: #1b7741;
+  --color-pink-deep: #ad2a6a;
+
+  /* Motion */
+  --animate-wobble: wobble 3.4s ease-in-out infinite;
+  --animate-float: float 5s ease-in-out infinite;
+  --animate-blink: blink 1.2s steps(1, end) infinite;
+
+  --shadow-lift: 0 1px 0 rgb(28 25 23 / 0.1), 0 10px 22px -12px rgb(28 25 23 / 0.45);
+  --shadow-press: 3px 3px 0 0 var(--color-ink);
+  --shadow-hard: 6px 6px 0 0 var(--color-ink);
+  --shadow-hard-lg: 9px 9px 0 0 var(--color-ink);
+
+  --breakpoint-xs: 26rem;
+
+  /* ±5° around each sticker's resting tilt */
+  @keyframes wobble {
+    0%,
+    100% {
+      transform: rotate(calc(var(--tilt, 0deg) - 5deg));
+    }
+    50% {
+      transform: rotate(calc(var(--tilt, 0deg) + 5deg));
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes blink {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.2;
+    }
+  }
+
+}
+
+/* Fonts come from next/font CSS variables set on <html>.
+   Pixel font is for the name only; headings and body share Figtree. */
+@theme inline {
+  --font-pixel: var(--font-pixelify), ui-monospace, monospace;
+  --font-display: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-hand: var(--font-kalam), "Segoe Print", "Bradley Hand", cursive;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ================================================================== */
+/* Base                                                                */
+/* ================================================================== */
+
+:root {
+  /* Ruled paper */
+  --line: 34px;
+  --rule: rgb(29 92 166 / 0.13);
+  --header-h: 64px;
+
+  /* Grain: an SVG noise tile, darker specks with partial alpha */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.9' numOctaves='3' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.1 0 0 0 0 0.09 0 0 0 0.5 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+
+  /* The paper itself (used by <body> and the intro overlay): grain over ruled lines */
+  --paper-images:
+    var(--grain),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(var(--line) - 1px),
+      var(--rule) calc(var(--line) - 1px),
+      var(--rule) var(--line)
+    );
+  --paper-sizes:
+    220px 220px,
+    100% var(--line);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-h) + 16px);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  @apply bg-paper font-sans text-ink antialiased;
+  background-image: var(--paper-images);
+  background-size: var(--paper-sizes);
+}
+
+::selection {
+  background: var(--color-yellow);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-blue-deep);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ================================================================== */
+/* Components                                                          */
+/* ================================================================== */
+
+@layer components {
+  .page {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+  }
+
+  /* Below-the-fold sections skip layout and paint until they near the
+     viewport. --defer-h is only a placeholder height; once a section has
+     rendered, the browser remembers its real size. */
+  .defer-render {
+    content-visibility: auto;
+    contain-intrinsic-size: auto var(--defer-h, 1000px);
+  }
+
+  /* Chunky card: thick ink border and a hard offset shadow */
+  .card-hard {
+    @apply relative rounded-[6px] border-[3px] border-ink shadow-hard;
+  }
+
+  /* Rubber-stamp label */
+  .stamp {
+    @apply inline-flex items-center gap-1.5 rounded-[6px] border-2 px-2 py-0.5 font-mono text-[0.72rem] font-semibold tracking-wider uppercase;
+    border-color: currentColor;
+    transform: rotate(var(--tilt, -2deg));
+    mask-image: var(--grain), linear-gradient(#000, #000);
+    mask-composite: exclude;
+    mask-size: 140px 140px, 100% 100%;
+  }
+
+  /* Small chip used for tags and skills */
+  .chip {
+    @apply inline-flex items-center rounded-full border-[1.5px] border-ink/70 bg-paper/80 px-2.5 py-0.5 font-mono text-[0.78rem] font-semibold text-ink;
+  }
+
+  /* Pill sticker */
+  .sticker {
+    @apply inline-flex items-center rounded-full border-2 border-ink px-4 py-1.5 font-mono text-[0.8rem] font-semibold tracking-wide uppercase shadow-press select-none;
+    transform: rotate(var(--tilt, 0deg));
+  }
+
+  /* Tilted caption tag that sits on a card's edge */
+  .tag {
+    @apply inline-flex items-center gap-2 rounded-[4px] border-2 border-ink px-2.5 py-1 font-mono text-[0.72rem] font-semibold tracking-[0.12em] text-ink uppercase shadow-press;
+    transform: rotate(var(--tilt, -3deg));
+  }
+
+  /* Washi tape: torn zig-zag ends via clip-path */
+  .tape {
+    @apply pointer-events-none absolute block h-7 w-24;
+    opacity: 0.85;
+    transform: rotate(var(--tilt, -4deg));
+    clip-path: polygon(
+      0 8%, 4% 0, 8% 10%, 12% 0, 88% 0, 92% 10%, 96% 0, 100% 8%,
+      97% 50%, 100% 92%, 96% 100%, 92% 90%, 88% 100%, 12% 100%, 8% 90%, 4% 100%, 0 92%, 3% 50%
+    );
+    background-image: linear-gradient(
+      100deg,
+      rgb(255 255 255 / 0.35) 0%,
+      rgb(255 255 255 / 0) 40%,
+      rgb(255 255 255 / 0.18) 70%,
+      rgb(255 255 255 / 0) 100%
+    );
+  }
+
+  /* Polaroid frame */
+  .polaroid {
+    @apply relative border-2 border-ink bg-white p-2.5 pb-10 shadow-press;
+    transform: rotate(var(--tilt, -2deg));
+  }
+
+  /* Lined index card: orange header rule, then faint blue lines */
+  .index-card {
+    @apply relative rounded-[4px] border-2 border-ink bg-white shadow-press;
+    background-image:
+      linear-gradient(
+        to bottom,
+        transparent 2.75rem,
+        rgb(179 67 10 / 0.45) 2.75rem,
+        rgb(179 67 10 / 0.45) calc(2.75rem + 1.5px),
+        transparent calc(2.75rem + 1.5px)
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 27px,
+        var(--rule) 27px,
+        var(--rule) 28px
+      );
+  }
+
+  /* Highlighter swipe behind inline text */
+  .highlight {
+    background-image: linear-gradient(
+      100deg,
+      transparent 0.2em,
+      color-mix(in oklab, var(--color-yellow) 85%, transparent) 0.3em,
+      color-mix(in oklab, var(--color-yellow) 70%, transparent) calc(100% - 0.3em),
+      transparent calc(100% - 0.2em)
+    );
+    background-size: 100% 0.5em;
+    background-position: 0 88%;
+    background-repeat: no-repeat;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+}
+
+/* ================================================================== */
+/* Intro splash (CSS only; once per session, never with reduced motion) */
+/* ================================================================== */
+
+/* Timeline: first line types in (0.06–0.8s), fades up (0.85s), second
+   line pops in word by word (0.95–1.4s), then the sheet fades (1.4–1.75s).
+   The page renders underneath the whole time. */
+.splash {
+  background-color: var(--color-paper);
+  background-image: var(--paper-images);
+  background-size: var(--paper-sizes);
+  animation: splash-out 0.35s ease-in 1.4s forwards;
+}
+.splash-first {
+  animation: splash-line-out 0.2s ease-in 0.85s forwards;
+}
+.splash-char,
+.splash-word {
+  display: inline-block;
+  opacity: 0;
+  animation: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.splash-char {
+  animation-delay: calc(var(--i) * 45ms + 60ms);
+}
+.splash-word {
+  animation-delay: calc(var(--i) * 80ms + 0.95s);
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes splash-line-out {
+  to {
+    opacity: 0;
+    translate: 0 -0.3em;
+  }
+}
+@keyframes splash-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+html[data-splash="seen"] .splash {
+  display: none;
+}
+
+/* ================================================================== */
+/* Name box: dark frame with selection handles and a cursor lens       */
+/* ================================================================== */
+
+.name-text {
+  display: block;
+  padding: 0.1em 0.28em 0.14em;
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Inverted copy of the name, revealed inside a circle that follows the mouse */
+.lens-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--color-yellow);
+  color: var(--color-ink);
+  clip-path: circle(var(--lens-r, 0px) at var(--lens-x, 50%) var(--lens-y, 50%));
+  transition: clip-path 0.18s ease-out;
+  pointer-events: none;
+}
+
+.lens-ring {
+  position: absolute;
+  left: var(--lens-x, 50%);
+  top: var(--lens-y, 50%);
+  width: calc(var(--lens-r, 0px) * 2);
+  height: calc(var(--lens-r, 0px) * 2);
+  translate: -50% -50%;
+  border: 2px dashed var(--color-ink);
+  border-radius: 50%;
+  pointer-events: none;
+  transition:
+    width 0.18s ease-out,
+    height 0.18s ease-out;
+}
+
+/* Square handles on the corners of the selection frame */
+.handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--color-paper);
+  border: 2px solid var(--color-blue-deep);
+}
+
+/* ================================================================== */
+/* Project stack: cards stick and pile up on large screens             */
+/* ================================================================== */
+
+/* Only on screens tall enough to show a whole card under the header. */
+@media (width >= 64rem) and (height >= 44rem) {
+  .stack {
+    view-timeline: --stack block;
+    view-timeline-inset: calc(var(--header-h) + 32px) 0px;
+  }
+  .stack > li {
+    position: sticky;
+    top: calc(var(--header-h) + 32px + var(--i) * 24px);
+  }
+}
+
+/* Cards underneath shrink a little as the next one slides over them.
+   Scroll-driven, so it runs off the main thread; browsers without
+   support simply stack the cards at full size. */
+@supports (animation-timeline: view()) {
+  @media (width >= 64rem) and (height >= 44rem) and (prefers-reduced-motion: no-preference) {
+    .stack-card {
+      transform-origin: 50% 0;
+      animation: stack-shrink linear both;
+      animation-timeline: --stack;
+      animation-range:
+        exit-crossing calc(var(--i) / var(--n) * 100%)
+        exit-crossing calc((var(--i) + 1) / var(--n) * 100%);
+    }
+  }
+}
+
+@keyframes stack-shrink {
+  to {
+    scale: calc(1 - (var(--n) - 1 - var(--i)) * 0.03);
+  }
+}
+
+/* ================================================================== */
+/* Reduced motion: no splash, no loops, no smooth scrolling            */
+/* ================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .splash {
+    display: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Set by HashJumps.tsx just before a jump to /#section: lazy sections
+   render for real so the jump lands on the right spot. */
+.render-all .defer-render {
+  content-visibility: visible;
+}

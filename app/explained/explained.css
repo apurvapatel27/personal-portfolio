@@ -1,0 +1,1190 @@
+/* ================================================================== */
+/* /explained: scroll-driven explainer                                 */
+/*                                                                     */
+/* Each chapter's progress --p (0 → 1) is written by Explainer.tsx.    */
+/* Timed elements (.vx-t) turn it into their own --t using the window  */
+/* --a/--b set inline. Everything is a pure function of --p, so        */
+/* scrolling back rewinds it.                                          */
+/* ================================================================== */
+
+@property --p {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+@property --t {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+@property --u {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+@property --v {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+/* The site's Crayon tokens under explainer names. */
+.vx {
+  --vx-paper: var(--color-paper);
+  --vx-ink: var(--color-ink);
+  --vx-ink-soft: var(--color-ink-soft);
+  --vx-yellow: var(--color-yellow);
+  --vx-orange: var(--color-orange);
+  --vx-pink: var(--color-pink);
+  --vx-blue: var(--color-blue);
+  --vx-green: var(--color-green);
+  --vx-mint: var(--color-mint);
+  --vx-red: var(--color-red);
+  --vx-sheet: #fffdf8;
+  --vx-hand: var(--font-kalam), "Segoe Print", cursive;
+  --vx-display: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --vx-mono: var(--font-plex-mono), ui-monospace, monospace;
+  /* The sticky site header, including its 3px border */
+  --vx-top: calc(var(--header-h) + 3px);
+  --torn-h: clamp(28px, 5vw, 72px);
+}
+
+/* ------------------------------------------------------------------ */
+/* Engine                                                              */
+/* ------------------------------------------------------------------ */
+
+/* Static by default (no JS, reduced motion): every chapter shows its
+   finished state as a normal section. */
+.vx-chapter {
+  --p: 1;
+  position: relative;
+}
+
+.vx-stage {
+  position: relative;
+  overflow: clip;
+  background-color: var(--vx-paper);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--vx-paper) 45%, transparent)),
+    url(/vox/paper.webp);
+  background-size: auto, 512px;
+}
+
+.vx-cam {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding-block: 4rem;
+  transform-origin: 50% 50%;
+}
+
+.vx-t {
+  --t: clamp(0, (var(--p) - var(--a, 0)) / (var(--b, 1) - var(--a, 0)), 1);
+}
+/* A focused link shows in full straight away, wherever the scroll is. */
+.vx-t:is(:focus-visible, :focus-within) {
+  --t: 1;
+}
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .vx-chapter {
+    --p: 0;
+    height: calc(var(--len) * 100svh);
+  }
+  .vx-stage {
+    position: sticky;
+    top: var(--vx-top);
+    height: calc(100svh - var(--vx-top));
+    overflow: hidden;
+  }
+  .vx-cam {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+  }
+}
+
+/* Slap: lands a little oversized and rotated, then settles (at --rest). */
+.vx-slap {
+  --u: clamp(0, var(--t) / 0.6, 1);
+  --v: clamp(0, (var(--t) - 0.6) / 0.4, 1);
+  opacity: clamp(0, var(--u) * 2.5, 1);
+  scale: calc(1 + 0.5 * (1 - var(--u)) * (1 - var(--u)) + 0.05 * (1 - var(--v)));
+  rotate: calc(var(--rest, 0deg) + var(--rot, -4deg) * ((1 - var(--v)) + 1.5 * (1 - var(--u))));
+}
+
+/* Fades and rises into place. */
+.vx-rise {
+  opacity: var(--t);
+  translate: 0 calc((1 - var(--t)) * 0.8em);
+}
+
+/* Types in left to right (single lines). */
+.vx-type {
+  clip-path: inset(-0.4em calc((1 - var(--t)) * 100%) -0.4em -0.4em);
+}
+
+/* ------------------------------------------------------------------ */
+/* Ink: highlighter, marker circle, arrows                             */
+/* ------------------------------------------------------------------ */
+
+.vx-ink {
+  position: absolute;
+  pointer-events: none;
+  animation: vx-boil 0.25s steps(1) infinite;
+}
+
+.vx-hl,
+.vx-circle {
+  position: relative;
+  white-space: nowrap;
+}
+
+/* Yellow swipe, multiplied so the ink text stays black. */
+.vx-hl > .vx-ink {
+  inset: 0.1em -0.22em 0 -0.28em;
+  mix-blend-mode: multiply;
+}
+.vx-hl > .vx-ink::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--vx-yellow);
+  mask: url(/vox/highlighter.webp) 0 0 / 100% 100% no-repeat;
+  clip-path: inset(0 calc((1 - var(--t)) * 100%) 0 0);
+}
+
+/* Red ring, revealed by a conic sweep so it draws itself. */
+.vx-circle > .vx-ink {
+  inset: -0.62em -0.75em -0.55em -0.7em;
+}
+.vx-circle > .vx-ink::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--vx-red);
+  mask:
+    url(/vox/circle.webp) 0 0 / 100% 100% no-repeat,
+    conic-gradient(from 20deg, #000 calc(var(--t) * 360deg), transparent 0);
+  mask-composite: intersect;
+}
+
+/* Red marker arrow (points up and to the right). */
+.vx-arrow {
+  display: inline-block;
+  width: 3.4em;
+  aspect-ratio: 1200 / 455;
+  background: var(--vx-red);
+  mask: url(/vox/arrow.webp) 0 0 / 100% 100% no-repeat;
+}
+
+/* Red marker arrow that draws itself from tail to head. The artwork
+   rises at ~21°, so rotate 21deg for a level arrow. */
+.vx-draw-arrow {
+  position: relative;
+  display: block;
+  aspect-ratio: 1200 / 455;
+}
+.vx-draw-arrow > .vx-ink {
+  inset: 0;
+}
+.vx-draw-arrow > .vx-ink::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--vx-red);
+  mask: url(/vox/arrow.webp) 0 0 / 100% 100% no-repeat;
+  clip-path: inset(-10% calc((1 - var(--t)) * 100%) -10% -10%);
+}
+
+/* ------------------------------------------------------------------ */
+/* Texture on twos (12 fps): ink boil and paper grain. Motion itself   */
+/* stays smooth; only these hold each frame for two.                   */
+/* ------------------------------------------------------------------ */
+
+@keyframes vx-boil {
+  0% {
+    filter: url(#vx-boil-0);
+  }
+  33.333% {
+    filter: url(#vx-boil-1);
+  }
+  66.667% {
+    filter: url(#vx-boil-2);
+  }
+}
+
+.vx-grain {
+  position: absolute;
+  inset: -120px;
+  z-index: 4;
+  pointer-events: none;
+  background-image: var(--grain);
+  background-size: 220px 220px;
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+  animation: vx-grain 0.5s steps(1) infinite;
+}
+
+@keyframes vx-grain {
+  0% {
+    translate: 0 0;
+  }
+  16.667% {
+    translate: -61px 37px;
+  }
+  33.333% {
+    translate: 43px -71px;
+  }
+  50% {
+    translate: -97px -23px;
+  }
+  66.667% {
+    translate: 79px 59px;
+  }
+  83.333% {
+    translate: -29px 101px;
+  }
+}
+
+/* While playing, chapters far from the screen don't fetch their artwork
+   (paper, masks, torn edges, stamps) until the engine marks them near.
+   The title chapter is on screen at load, so it always fetches. */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .vx-chapter:not([data-near], :first-of-type),
+  .vx-chapter:not([data-near], :first-of-type) *,
+  .vx-chapter:not([data-near], :first-of-type) *::before,
+  .vx-chapter:not([data-near], :first-of-type) *::after {
+    background-image: none !important;
+    mask-image: none !important;
+  }
+  /* Tapes sit on top of the layout, so hiding them moves nothing, and
+     lazy images that aren't rendered aren't fetched. */
+  .vx-chapter:not([data-near], :first-of-type) .vx-tape {
+    display: none;
+  }
+}
+
+/* The boil filters are costly to draw, so the first frame goes out
+   without them: the engine sets data-live once the page has painted. */
+.vx:not([data-live]) :is(.vx-grain, .vx-ink, .vx-string) {
+  animation: none;
+}
+
+/* Nothing boils in chapters that are off screen. */
+.vx-chapter:not([data-near]) :is(.vx-grain, .vx-ink, .vx-string) {
+  animation-play-state: paused;
+}
+
+/* ------------------------------------------------------------------ */
+/* Pieces                                                              */
+/* ------------------------------------------------------------------ */
+
+.vx-tape {
+  pointer-events: none;
+  filter: drop-shadow(0 1px 0.6px rgb(60 40 20 / 0.22)) drop-shadow(0 3px 5px rgb(60 40 20 / 0.12));
+}
+
+/* Chapter card: a full-bleed block in the chapter's colour, torn along
+   its bottom edge. Static mode shows it as a normal heading block. */
+.vx-card {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 50svh;
+  margin-bottom: var(--torn-h);
+  background: var(--card);
+}
+.vx-card::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 calc(var(--torn-h) * -0.5);
+  height: var(--torn-h);
+  background: var(--card);
+  mask: url(/vox/torn.webp) 0 0 / 100% 100% no-repeat;
+}
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .vx-card {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    min-height: 0;
+    margin: 0;
+    translate: 0 calc(var(--t) * (-100% - var(--torn-h)));
+  }
+}
+
+.vx-card-title {
+  display: grid;
+  justify-items: center;
+  gap: 0.2em;
+  font-family: var(--vx-display);
+  font-weight: 800;
+  line-height: 0.85;
+  text-align: center;
+}
+.vx-card-number {
+  font-size: clamp(7rem, 26vw, 17rem);
+  letter-spacing: -0.04em;
+}
+.vx-card-name {
+  font-size: clamp(2.2rem, 6vw, 4.75rem);
+  letter-spacing: -0.02em;
+}
+
+/* Title card */
+.vx-title-layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  width: min(74rem, 100% - 2.5rem);
+  min-height: calc(100svh - var(--vx-top) - 8rem);
+}
+.vx-title-heading {
+  margin-top: 0.9rem;
+  font-family: var(--vx-display);
+  font-size: clamp(2.3rem, 1rem + 4.4vw, 5rem);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  /* Keeps the breaks at "student, / a messy / spreadsheet / and an". */
+  max-width: 6.6em;
+}
+.vx-title-photo {
+  position: relative;
+  width: min(100%, calc((100svh - var(--vx-top)) * 0.62), 580px);
+  justify-self: center;
+  rotate: 2.5deg;
+}
+.vx-title-tape {
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  z-index: 1;
+  width: 46%;
+  height: auto;
+  translate: -50% 0;
+  rotate: -4deg;
+}
+/* Under the photo, clear of the heading, with the arrow pointing up at it. */
+.vx-title-note {
+  position: absolute;
+  top: calc(100% + 0.1em);
+  right: 6%;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25em;
+  rotate: -5deg;
+  font-family: var(--vx-hand);
+  font-size: clamp(1.35rem, 1.9vw, 1.8rem);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.vx-title-note .vx-arrow {
+  width: 2.6em;
+  margin-top: -0.6em;
+  scale: -1 1;
+  rotate: 28deg;
+}
+.vx-scroll-hint {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  translate: -50% 0;
+  font-family: var(--vx-hand);
+  font-size: 1.35rem;
+  font-weight: 700;
+  opacity: calc(1 - var(--t));
+}
+
+/* The project brief: a typed sheet, taped to the stage */
+.vx-doc-wrap {
+  position: relative;
+  width: min(44rem, 100% - 2.5rem);
+  font-size: min(clamp(0.86rem, 0.55rem + 0.75vw, 1.1rem), 2.3svh);
+}
+.vx-doc {
+  position: relative;
+  padding: 2.2em 2em 2em;
+  background: var(--vx-sheet);
+  border: 2px solid var(--vx-ink);
+  border-radius: 3px;
+  box-shadow: var(--shadow-press);
+  font-family: var(--vx-mono);
+  font-weight: 600;
+}
+.vx-doc-tape {
+  position: absolute;
+  top: -1.3em;
+  left: 50%;
+  width: 36%;
+  height: auto;
+  translate: -50% 0;
+}
+.vx-doc-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  padding-bottom: 0.7em;
+  border-bottom: 2px solid var(--vx-ink);
+  font-size: 0.82em;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.vx-doc-fields {
+  display: grid;
+  gap: 0.35em;
+  margin-block: 1.1em 1.4em;
+}
+.vx-doc-fields > div {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.6em;
+}
+.vx-doc-fields dt {
+  min-width: 5.5em;
+  color: var(--vx-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.vx-doc-label {
+  margin-bottom: 0.5em;
+  color: var(--vx-ink-soft);
+  font-size: 0.82em;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.vx-doc-brief {
+  font-size: 1.08em;
+  line-height: 1.85;
+  font-weight: 600;
+}
+.vx-doc-sticker {
+  position: absolute;
+  right: -0.8em;
+  bottom: -1.4em;
+  z-index: 2;
+}
+
+/* The sticker that ends a chapter: under the content on the static page,
+   pinned to the stage's corner while playing. */
+.vx-stage-sticker {
+  display: flex;
+  width: fit-content;
+  margin: -1rem clamp(1rem, 4vw, 3rem) 2.5rem auto;
+}
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .vx-stage-sticker {
+    position: absolute;
+    right: clamp(1rem, 4vw, 3rem);
+    bottom: clamp(1rem, 4svh, 2.5rem);
+    z-index: 5;
+    margin: 0;
+  }
+}
+
+/* ---- 02 · Build: timeline panels the camera pans across ---------- */
+
+.vx {
+  --panel-w: min(46rem, 64vw);
+  --panel-wide: min(66rem, 92vw);
+  --arrow-w: clamp(5rem, 9vw, 8.5rem);
+}
+
+/* Static: panels stack. Play: one long row the camera pans along. */
+.vx-track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rem;
+  width: min(60rem, 100% - 2.5rem);
+}
+.vx-stop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.vx-stop-arrow {
+  display: none;
+}
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .vx-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    flex-direction: row;
+    gap: 0;
+    width: auto;
+    height: 100%;
+  }
+  .vx-stop {
+    flex: 0 0 var(--panel-w);
+    width: var(--panel-w);
+    height: 100%;
+  }
+  .vx-stop:has(> .vx-stop-body--wide) {
+    --panel-w: var(--panel-wide);
+  }
+  .vx-stop-arrow {
+    display: block;
+    position: absolute;
+    top: 50%;
+    right: calc(var(--arrow-w) * -0.5);
+    z-index: 1;
+    width: var(--arrow-w);
+    translate: 0 -50%;
+    rotate: 21deg;
+  }
+}
+
+.vx-stop-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem 2.25rem;
+  max-width: calc(100% - var(--arrow-w));
+}
+.vx-stop-card {
+  position: relative;
+  width: min(28rem, 100%);
+  padding: 0.85rem 1.5rem 1.5rem;
+}
+.vx-stop-when {
+  display: flex;
+  align-items: center;
+  height: 1.9rem;
+  font-family: var(--vx-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.vx-stop-title {
+  margin-top: 1rem;
+  font-family: var(--vx-display);
+  font-size: clamp(1.3rem, 2.3vw, 2rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+.vx-stop-org {
+  margin-top: 0.35rem;
+  color: var(--vx-ink-soft);
+  font-size: clamp(1rem, 1.2vw, 1.1rem);
+  font-weight: 600;
+}
+.vx-stop-note {
+  margin-top: 0.6rem;
+  color: var(--color-blue-deep);
+  font-family: var(--vx-hand);
+  font-size: clamp(1.15rem, 1.5vw, 1.35rem);
+  font-weight: 700;
+  line-height: 1.2;
+}
+.vx-stop-card--work {
+  width: 100%;
+  padding: 0.9rem 1.2rem 1.1rem;
+  background: var(--color-yellow-tint);
+  border: 2px solid var(--vx-ink);
+  border-radius: 6px;
+  box-shadow: var(--shadow-press);
+}
+.vx-stop-card--work .vx-stop-when {
+  height: auto;
+}
+.vx-stop-card--work .vx-stop-title {
+  margin-top: 0.4rem;
+  font-size: 1.25rem;
+}
+.vx-stop-extra {
+  display: grid;
+  justify-items: center;
+  gap: 1.75rem;
+  width: min(19rem, 100%);
+}
+
+/* Screenshot slots, pinned or taped */
+.vx-shot {
+  position: relative;
+  width: min(17rem, 100%);
+}
+.vx-shot-frame {
+  aspect-ratio: 16 / 10;
+  padding: 0.45rem;
+  background: #fff;
+  border: 2px solid var(--vx-ink);
+  box-shadow: var(--shadow-press);
+}
+.vx-shot-empty {
+  display: grid;
+  place-content: center;
+  gap: 0.25rem;
+  height: 100%;
+  border: 2px dashed rgb(28 25 23 / 0.3);
+  background: repeating-linear-gradient(-45deg, transparent 0 9px, rgb(28 25 23 / 0.05) 9px 11px);
+  color: var(--vx-ink-soft);
+  font-family: var(--vx-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.vx-shot-empty span:last-child {
+  color: var(--vx-ink);
+}
+.vx-shot-pin {
+  position: absolute;
+  top: -1.75rem;
+  left: 50%;
+  width: 1.5rem;
+  height: auto;
+  translate: -50% 0;
+  rotate: 10deg;
+  filter: drop-shadow(2px 3px 2px rgb(28 25 23 / 0.3));
+}
+.vx-shot-pin--right {
+  left: 80%;
+  rotate: -8deg;
+}
+.vx-shot-tape {
+  position: absolute;
+  top: -0.85rem;
+  left: 50%;
+  width: 52%;
+  height: auto;
+  translate: -50% 0;
+  rotate: -3deg;
+}
+.vx-shot-tape--tilt {
+  left: 28%;
+  rotate: -12deg;
+}
+.vx-shot-caption {
+  margin-top: 0.7rem;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+.vx-shot-caption strong {
+  font-weight: 800;
+}
+
+.vx-projects-heading {
+  width: 100%;
+  font-family: var(--vx-hand);
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+  font-weight: 700;
+  text-align: center;
+}
+.vx-projects {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2.5rem 2rem;
+  width: 100%;
+}
+.vx-projects .vx-shot {
+  width: min(17rem, 100%);
+}
+
+/* ---- 03 · AI agents: lead → agent → tasks ------------------------ */
+
+.vx-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.5rem, 1.5vw, 1.25rem);
+  width: min(80rem, 100% - 2.5rem);
+}
+.vx-node {
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(10rem, 16vw, 15rem);
+  padding: 1.1rem 1rem 1.2rem;
+  background: #fff;
+  border: 2px solid var(--vx-ink);
+  border-radius: 10px;
+  box-shadow: var(--shadow-press);
+  text-align: center;
+}
+.vx-node--agent {
+  background: var(--vx-mint);
+  border-radius: 28px;
+}
+.vx-node-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-inline: auto;
+}
+.vx-node-title {
+  margin-top: 0.4rem;
+  font-family: var(--vx-display);
+  font-size: clamp(1.35rem, 1.8vw, 1.7rem);
+  font-weight: 800;
+}
+.vx-node-note {
+  color: var(--vx-ink-soft);
+  font-family: var(--vx-hand);
+  font-size: clamp(1.05rem, 1.3vw, 1.2rem);
+  font-weight: 700;
+}
+.vx-flow-arrow {
+  flex: 0 0 clamp(4.5rem, 8vw, 8rem);
+  rotate: 21deg;
+}
+.vx-tasks {
+  position: relative;
+  flex: 0 1 29rem;
+  padding: 0.85rem 1.5rem 1.5rem;
+}
+.vx-tasks-title {
+  display: flex;
+  align-items: center;
+  height: 1.9rem;
+  font-family: var(--vx-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.vx-tasks-group {
+  margin-top: 1rem;
+  font-family: var(--vx-hand);
+  font-size: clamp(1.25rem, 1.6vw, 1.45rem);
+  font-weight: 700;
+}
+.vx-tasks-list {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.3rem;
+  font-size: clamp(1rem, 1.25vw, 1.12rem);
+  font-weight: 600;
+}
+.vx-tasks-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.vx-check {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 1.3rem;
+  height: 1.3rem;
+  border: 2px solid var(--vx-ink);
+  border-radius: 5px;
+  background: var(--color-green-deep);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+.vx-check--todo {
+  background: #fff;
+}
+/* Built-in tools work, but aren't AI: ticked in ink rather than green. */
+.vx-check--tool {
+  background: #fff;
+  color: var(--vx-ink);
+}
+.vx-tasks-tools {
+  margin-top: 0.6rem;
+  padding-top: 0.2rem;
+  border-top: 2px dashed rgb(28 25 23 / 0.25);
+}
+.vx-tasks-next {
+  position: relative;
+}
+
+/* Rubber stamp: real text over stamp.webp, inked through the paper grain */
+.vx-stamp {
+  position: absolute;
+  top: -1.55rem;
+  right: -0.9rem;
+  z-index: 1;
+  padding: 0.5em 1em;
+  /* Deeper than the ring so the text clears 4.5:1 on the sheet. */
+  color: color-mix(in srgb, var(--vx-red) 78%, #000);
+  font-family: var(--vx-mono);
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  mask: var(--grain) 0 0 / 140px 140px, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+.vx-stamp::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--vx-red);
+  mask: url(/vox/stamp.webp) 0 0 / 100% 100% no-repeat;
+}
+
+/* ---- 04 · Journey: map, pins and red string ---------------------- */
+
+.vx-map {
+  position: relative;
+  width: min(68rem, 100% - 3rem, (100svh - var(--vx-top) - 7rem) * 1.7778);
+  container-type: inline-size;
+}
+.vx-map-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 3px;
+  box-shadow: 0 12px 30px -14px rgb(28 25 23 / 0.55);
+}
+.vx-map-tape {
+  position: absolute;
+  top: -1.1rem;
+  z-index: 2;
+  width: 16%;
+  height: auto;
+}
+.vx-map-tape--left {
+  left: -3%;
+  rotate: -26deg;
+}
+.vx-map-tape--right {
+  right: -3%;
+  rotate: 24deg;
+}
+
+/* Each place is a zero-size point at its spot on the map. */
+.vx-place {
+  position: absolute;
+  top: calc(var(--y) * 1%);
+  left: calc(var(--x) * 1%);
+  z-index: 2;
+}
+.vx-place-focus,
+.vx-map-mid {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.vx-place-focus {
+  top: -2.5cqw;
+  left: 0;
+}
+.vx-map-mid {
+  top: 50%;
+  left: 50%;
+}
+.vx-pin {
+  position: absolute;
+  bottom: 0;
+  left: calc(2.8cqw * -0.417);
+  width: 2.8cqw;
+  max-width: none;
+  height: auto;
+  filter: drop-shadow(2px 3px 2px rgb(28 25 23 / 0.35));
+}
+.vx-place-label {
+  position: absolute;
+  top: -5.4cqw;
+  left: 2cqw;
+  padding: 0.1em 0.55em;
+  background: #fff;
+  border: 2px solid var(--vx-ink);
+  border-radius: 4px;
+  box-shadow: var(--shadow-press);
+  font-family: var(--vx-hand);
+  font-size: clamp(0.8rem, 1.5cqw, 1.15rem);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Pin drop: falls in, lands, and bounces once. */
+.vx-drop {
+  --u: clamp(0, var(--t) / 0.7, 1);
+  --v: clamp(0, (var(--t) - 0.7) / 0.3, 1);
+  opacity: clamp(0, var(--u) * 4, 1);
+  translate: 0 calc(-260% * (1 - var(--u)) * (1 - var(--u)) - 10% * sin(var(--v) * 3.14159));
+}
+
+.vx-string {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  animation: vx-boil 0.25s steps(1) infinite;
+}
+.vx-string path {
+  fill: none;
+  stroke: var(--vx-red);
+  stroke-width: 0.32;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--t));
+}
+
+.vx-map-caption {
+  position: absolute;
+  bottom: -1.3rem;
+  left: var(--cap-x, 50%);
+  z-index: 3;
+  translate: -50% 0;
+  padding: 0.3em 0.9em;
+  background: var(--vx-yellow);
+  border: 2px solid var(--vx-ink);
+  border-radius: 4px;
+  box-shadow: var(--shadow-press);
+  font-family: var(--vx-hand);
+  font-size: clamp(1.05rem, 2.1cqw, 1.6rem);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ---- End card: three torn-paper doors ---------------------------- */
+
+.vx-end {
+  display: grid;
+  justify-items: center;
+  gap: clamp(1.5rem, 4svh, 3rem);
+  width: min(62rem, 100% - 2.5rem);
+}
+.vx-end-title {
+  font-family: var(--vx-display);
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.vx-doors {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 3vw, 2.5rem);
+  width: 100%;
+}
+.vx-door {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  align-content: end;
+  gap: 0.2rem;
+  min-height: clamp(14rem, 42svh, 24rem);
+  padding: calc(var(--torn-h) * 0.6 + 1rem) 1.6rem calc(var(--torn-h) * 0.6 + 1rem);
+  transition:
+    translate 0.2s ease-out,
+    rotate 0.2s ease-out;
+}
+.vx-door:hover {
+  translate: 0 -6px;
+  rotate: -1deg;
+}
+/* Paper body plus a torn strip on the top and bottom edges; the sides
+   get a small jagged clip so no edge looks cut with scissors. */
+.vx-door-paper {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(var(--door) 0 0) 0 50% / 100% calc(100% - var(--torn-h)) no-repeat;
+  clip-path: var(--sides);
+}
+.vx-door-paper::before,
+.vx-door-paper::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--torn-h);
+  background: var(--door);
+  mask: url(/vox/torn.webp) var(--tear-x, 0) 0 / auto 100% repeat-x;
+}
+.vx-door-paper::before {
+  top: 0;
+}
+.vx-door-paper::after {
+  bottom: 0;
+  rotate: 180deg;
+}
+.vx-door-label {
+  font-family: var(--vx-display);
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1;
+}
+.vx-door-note {
+  font-family: var(--vx-hand);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+.vx-door-icon {
+  position: absolute;
+  top: calc(var(--torn-h) * 0.6 + 1rem);
+  right: 1.4rem;
+  width: 2rem;
+  height: 2rem;
+}
+
+/* ---- Narrower screens: the agent flow becomes a column ----------- */
+
+@media (max-width: 52rem) {
+  .vx-flow {
+    flex-direction: column;
+    gap: 0;
+  }
+  .vx-flow-arrow {
+    flex: 0 0 auto;
+    position: relative;
+    z-index: 1;
+    width: 2.75rem;
+    margin-block: 0.95rem;
+    rotate: 111deg;
+  }
+  .vx-node {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 0.75rem;
+    align-items: center;
+    width: min(18rem, 100%);
+    padding: 0.7rem 1rem;
+    text-align: left;
+  }
+  .vx-node-icon {
+    grid-row: span 2;
+  }
+  .vx-node-title {
+    margin-top: 0;
+    font-size: 1.2rem;
+  }
+  .vx-tasks {
+    flex: 0 0 auto;
+    width: min(24rem, 100%);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Phones                                                              */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 40rem) {
+  .vx-title-layout {
+    grid-template-columns: 1fr;
+    align-content: center;
+    gap: 1.75rem;
+  }
+  .vx-title-heading {
+    max-width: none;
+  }
+  .vx-title-photo {
+    width: min(68%, calc((100svh - var(--vx-top)) * 0.36));
+  }
+  .vx-title-note {
+    top: auto;
+    right: -0.4em;
+    bottom: -0.6em;
+    font-size: 1.15rem;
+  }
+  .vx-title-note .vx-arrow {
+    display: none;
+  }
+  .vx-doc-wrap {
+    width: calc(100% - 4rem);
+  }
+  .vx-doc {
+    padding: 2em 1.1em 1.6em;
+  }
+  .vx-doc-sticker {
+    right: 0.4em;
+  }
+
+  .vx {
+    --panel-w: 88vw;
+    --panel-wide: 88vw;
+    --arrow-w: 3.25rem;
+  }
+  .vx-stop-body {
+    gap: 1.1rem;
+  }
+  .vx-stop-card {
+    width: min(19rem, 100%);
+  }
+  .vx-stop-extra {
+    gap: 1.4rem;
+    width: min(16rem, 100%);
+  }
+  /* Two up, the third centred below, so the chapter sticker stays clear. */
+  .vx-projects {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.2rem 1rem;
+  }
+  .vx-projects .vx-shot {
+    width: 100%;
+  }
+  .vx-projects .vx-shot:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: calc(50% - 0.5rem);
+  }
+  .vx-shot-empty {
+    font-size: 0.6rem;
+    letter-spacing: 0.04em;
+  }
+  .vx-projects-heading {
+    margin-bottom: 0.9rem;
+  }
+  .vx-shot-caption {
+    font-size: 0.82rem;
+  }
+
+  .vx-tasks {
+    padding: 0.6rem 1.1rem 1rem;
+  }
+  .vx-tasks-group {
+    margin-top: 0.65rem;
+  }
+  .vx-tasks-list {
+    gap: 0.25rem;
+  }
+  .vx-stamp {
+    font-size: 1.17rem;
+  }
+
+  /* While playing, the map is wider than the screen and the camera pans
+     across it. The static page keeps it at full width. */
+  @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    .vx-map {
+      width: 160vw;
+    }
+    .vx-map-mid {
+      top: var(--my);
+      left: var(--mx);
+    }
+    .vx-map-caption {
+      --cap-x: var(--mx);
+    }
+  }
+  .vx-map-caption {
+    width: max-content;
+    max-width: 78vw;
+    font-size: 1.05rem;
+    text-align: center;
+    white-space: normal;
+  }
+  .vx-place-label {
+    font-size: 0.8rem;
+  }
+  /* Labels in the east half sit left of their pin, inside the screen. */
+  .vx-place--east .vx-place-label {
+    left: auto;
+    right: 1.6cqw;
+  }
+
+  .vx-doors {
+    grid-template-columns: 1fr;
+  }
+  .vx-door {
+    min-height: 8.5rem;
+  }
+}
