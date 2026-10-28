@@ -370,10 +370,10 @@ export const about = {
     "These days that means CRMs and internal tools where AI agents and automations handle the repetitive work: no more copying data between spreadsheets or re-sending the same email by hand.",
   ],
   photo: {
-    src: "/images/apurva.jpg",
+    src: "/images/apurva-beach.jpg",
     width: 900,
     height: 1125,
-    alt: "Apurva Patel smiling in sunglasses and a white T-shirt, standing on a frozen lake in front of snowy mountains",
+    alt: "Apurva Patel in sunglasses and a green T-shirt, arms crossed, looking out to sea on a beach with waves behind",
     caption: "that's me!",
   },
   skillsHeading: "Toolbox",
