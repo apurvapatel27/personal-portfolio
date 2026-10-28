@@ -22,12 +22,17 @@ These days that means CRMs and internal tools where AI agents and automations ha
 
 ## Things I've built
 
-| Project | What it is | Built with |
-|---|---|---|
-| **AI-powered CRM**<br>[case study](https://apurva-patel.vercel.app/work/ai-crm) | A lead-management CRM I designed and built for my team of career advisors at StarTech Career LLC. It replaced manual Google Sheets entry and hand-sent emails, and 5 advisors use it every day. | Next.js, React, Node / Express, Supabase, Zoom API, Zapier |
-| **DayFlow**<br>[live demo](https://day-flow-tawny.vercel.app) · [code](https://github.com/apurvapatel27/DayFlow) | An HR system built with team TechFlow at the Odoo × GCET hackathon. It has an employee directory, attendance check-in/out, leave requests with approvals, and salary breakdowns. I designed and developed the app; a teammate hosted the repo. | React, Tailwind CSS, JavaScript |
-| **CyberPulse-Sniffer**<br>[code](https://github.com/apurvapatel27/CyberPulse-Sniffer) | An intrusion-detection prototype. A FastAPI service scores network traffic with XGBoost and Random Forest models, and a React dashboard shows the alerts as they arrive. Trained on synthetic data modelled on CICIDS2017. | Python, FastAPI, XGBoost, Random Forest, React |
-| **Employee Payroll System**<br>[code](https://github.com/apurvapatel27/Employee-Payroll-System) | A Java web app for managing employee payroll records, with JSP views over Servlets and JDBC on MySQL. | Java, Servlets / JSP, JDBC, MySQL, Bootstrap |
+**[AI-powered CRM](https://apurva-patel.vercel.app/work/ai-crm)** · Next.js, React, Node / Express, Supabase, Zoom API, Zapier<br>
+A lead-management CRM I designed and built for my team of career advisors at StarTech Career LLC. It replaced manual Google Sheets entry and hand-sent emails, and 5 advisors use it every day. [Read the case study →](https://apurva-patel.vercel.app/work/ai-crm)
+
+**[DayFlow](https://day-flow-tawny.vercel.app)** · React, Tailwind CSS, JavaScript<br>
+An HR system built with team TechFlow at the Odoo × GCET hackathon. It has an employee directory, attendance check-in/out, leave requests with approvals, and salary breakdowns. I designed and developed the app; a teammate hosted the repo. [Live demo](https://day-flow-tawny.vercel.app) · [code](https://github.com/apurvapatel27/DayFlow)
+
+**[CyberPulse-Sniffer](https://github.com/apurvapatel27/CyberPulse-Sniffer)** · Python, FastAPI, XGBoost, Random Forest, React<br>
+An intrusion-detection prototype. A FastAPI service scores network traffic with XGBoost and Random Forest models, and a React dashboard shows the alerts as they arrive. Trained on synthetic data modelled on CICIDS2017.
+
+**[Employee Payroll System](https://github.com/apurvapatel27/Employee-Payroll-System)** · Java, Servlets / JSP, JDBC, MySQL, Bootstrap<br>
+A Java web app for managing employee payroll records, with JSP views over Servlets and JDBC on MySQL.
 
 ## What I can help with
 
@@ -39,13 +44,11 @@ These days that means CRMs and internal tools where AI agents and automations ha
 
 ## Journey
 
-| When | What | Where |
-|---|---|---|
-| Sep 2026 – present | Career Advisor: designed and built the team's AI CRM | StarTech Career LLC |
-| 2024 – 2028 | B.Tech, Information Technology (in progress, CGPA 8.91) | MBIT, Anand |
-| Jan – Aug 2024 | Sales Associate | Rogers / The Source, Calgary |
-| Jan – Aug 2024 | Software Development (2 semesters) | SAIT, Calgary |
-| 2020 – 2023 | Diploma in Computer Engineering | K.J.I.T, Savli |
+- **Sep 2026 – present:** Career Advisor at StarTech Career LLC. I designed and built the team's AI CRM.
+- **2024 – 2028:** B.Tech in Information Technology at MBIT, Anand (in progress, CGPA 8.91)
+- **Jan – Aug 2024:** Sales Associate at Rogers / The Source, Calgary
+- **Jan – Aug 2024:** Software Development at SAIT, Calgary (2 semesters)
+- **2020 – 2023:** Diploma in Computer Engineering at K.J.I.T, Savli
 
 ## Toolbox
 
