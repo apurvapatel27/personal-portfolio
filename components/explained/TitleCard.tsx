@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- <picture> serves the hand-tuned AVIF with a WebP fallback */
 import { explained } from "@/content/site";
-import { Chapter, Highlight, win } from "./Chapter";
+import { Chapter, Highlight, tapeImage, win } from "./Chapter";
 
 const { titleCard } = explained;
 
@@ -47,7 +47,7 @@ export function TitleCard() {
         </div>
 
         <figure className="vx-title-photo">
-          <img src="/vox/tape-2.webp" alt="" width={800} height={164} className="vx-tape vx-title-tape" />
+          <img {...tapeImage("/vox/tape-2.webp")} alt="" width={800} height={164} className="vx-tape vx-title-tape" />
           <picture>
             <source srcSet={srcSet(photo.small.avif, photo.avif)} sizes={PHOTO_SIZES} type="image/avif" />
             <img

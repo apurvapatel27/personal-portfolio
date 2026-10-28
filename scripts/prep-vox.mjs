@@ -166,11 +166,15 @@ async function tapes() {
     }
     // Near-lossless: the tape is translucent, and lossy WebP's colour
     // subsampling brings back a pink cast in its crinkles that the despill
-    // removed. 800px keeps the size down and is plenty for a strip of tape.
-    await saveRgba(band, width, height, alphaBox(band, width, height), `tape-${k + 1}`, 0, {
-      maxWidth: 800,
-      webp: { nearLossless: true, quality: 60, effort: 6 },
-    });
+    // removed. 800px keeps the size down and is plenty for a strip of tape;
+    // phones show tapes ~150 CSS px wide, so they get the 400px copy.
+    const box = alphaBox(band, width, height);
+    for (const [maxWidth, file] of [[800, `tape-${k + 1}`], [400, `tape-${k + 1}-400`]]) {
+      await saveRgba(band, width, height, box, file, 0, {
+        maxWidth,
+        webp: { nearLossless: true, quality: 60, effort: 6 },
+      });
+    }
   }
   return bands;
 }

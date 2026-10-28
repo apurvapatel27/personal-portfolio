@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- decorative tape and pins at their exact processed size */
 import { explained } from "@/content/site";
 import { cn } from "@/lib/ui";
-import { Chapter, MarkerArrow, win } from "./Chapter";
+import { Chapter, MarkerArrow, tapeImage, win } from "./Chapter";
 
 const { build } = explained;
 
@@ -10,9 +10,9 @@ type Project = (typeof build.projects)[number];
 // Tape and pins take turns holding the screenshots up.
 const fixings = [
   { src: "/vox/pin.webp", width: 367, height: 744, className: "vx-shot-pin" },
-  { src: "/vox/tape-3.webp", width: 800, height: 119, className: "vx-tape vx-shot-tape" },
+  { ...tapeImage("/vox/tape-3.webp"), width: 800, height: 119, className: "vx-tape vx-shot-tape" },
   { src: "/vox/pin.webp", width: 367, height: 744, className: "vx-shot-pin vx-shot-pin--right" },
-  { src: "/vox/tape-1.webp", width: 800, height: 148, className: "vx-tape vx-shot-tape vx-shot-tape--tilt" },
+  { ...tapeImage("/vox/tape-1.webp"), width: 800, height: 148, className: "vx-tape vx-shot-tape vx-shot-tape--tilt" },
 ];
 
 /** A pinned or taped screenshot slot with a one-line caption. */
@@ -30,7 +30,7 @@ function ShotSlot({ project, index, a, b }: { project: Project; index: number; a
           </p>
         )}
       </div>
-      <img loading="lazy" src={fixing.src} alt="" width={fixing.width} height={fixing.height} className={fixing.className} />
+      <img loading="lazy" alt="" {...fixing} />
       <figcaption className="vx-shot-caption">
         <strong>{project.name}.</strong> {project.caption}
       </figcaption>

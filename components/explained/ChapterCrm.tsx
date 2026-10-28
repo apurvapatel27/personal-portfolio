@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- decorative tape at its exact processed size */
 import type { ReactNode } from "react";
 import { explained } from "@/content/site";
-import { Chapter, ChapterSticker, Highlight, MarkerCircle, win } from "./Chapter";
+import { Chapter, ChapterSticker, Highlight, MarkerCircle, tapeImage, win } from "./Chapter";
 
 const { crm } = explained;
 const { doc } = crm;
@@ -77,7 +77,7 @@ export function ChapterCrm() {
         <article className="vx-doc vx-slap vx-t" style={win(T.doc[0], T.doc[1], { "--rot": "-5deg" })}>
           <img
             loading="lazy"
-            src="/vox/tape-1.webp"
+            {...tapeImage("/vox/tape-1.webp")}
             alt=""
             width={800}
             height={148}

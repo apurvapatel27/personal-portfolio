@@ -164,7 +164,7 @@ body {
 
   /* Rubber-stamp label */
   .stamp {
-    @apply inline-flex items-center gap-1.5 rounded-[6px] border-2 px-2 py-0.5 font-mono text-[0.72rem] font-semibold tracking-wider uppercase;
+    @apply inline-flex items-center gap-1.5 rounded-[6px] border-2 px-2 py-0.5 font-mono text-[0.75rem] font-semibold tracking-wider uppercase;
     border-color: currentColor;
     transform: rotate(var(--tilt, -2deg));
     mask-image: var(--grain), linear-gradient(#000, #000);
@@ -185,7 +185,7 @@ body {
 
   /* Tilted caption tag that sits on a card's edge */
   .tag {
-    @apply inline-flex items-center gap-2 rounded-[4px] border-2 border-ink px-2.5 py-1 font-mono text-[0.72rem] font-semibold tracking-[0.12em] text-ink uppercase shadow-press;
+    @apply inline-flex items-center gap-2 rounded-[4px] border-2 border-ink px-2.5 py-1 font-mono text-[0.75rem] font-semibold tracking-[0.12em] text-ink uppercase shadow-press;
     transform: rotate(var(--tilt, -3deg));
   }
 

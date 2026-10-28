@@ -99,6 +99,15 @@
     "bytes": 43594
   },
   {
+    "name": "tape-1-400",
+    "src": "/vox/tape-1-400.webp",
+    "format": "webp",
+    "kind": "object",
+    "width": 400,
+    "height": 74,
+    "bytes": 19484
+  },
+  {
     "name": "tape-1",
     "src": "/vox/tape-1.webp",
     "format": "webp",
@@ -108,6 +117,15 @@
     "bytes": 69438
   },
   {
+    "name": "tape-2-400",
+    "src": "/vox/tape-2-400.webp",
+    "format": "webp",
+    "kind": "object",
+    "width": 400,
+    "height": 82,
+    "bytes": 22298
+  },
+  {
     "name": "tape-2",
     "src": "/vox/tape-2.webp",
     "format": "webp",
@@ -115,6 +133,15 @@
     "width": 800,
     "height": 164,
     "bytes": 81412
+  },
+  {
+    "name": "tape-3-400",
+    "src": "/vox/tape-3-400.webp",
+    "format": "webp",
+    "kind": "object",
+    "width": 400,
+    "height": 59,
+    "bytes": 16456
   },
   {
     "name": "tape-3",

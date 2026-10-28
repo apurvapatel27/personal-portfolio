@@ -2,7 +2,7 @@
 import type { CSSProperties } from "react";
 import { explained } from "@/content/site";
 import { cn } from "@/lib/ui";
-import { Chapter, win } from "./Chapter";
+import { Chapter, tapeImage, win } from "./Chapter";
 
 const { journey } = explained;
 const { map, places } = journey;
@@ -63,8 +63,8 @@ export function ChapterJourney() {
         className="vx-map vx-rise vx-t"
         style={win(T.map[0], T.map[1], { "--mx": `${(from.x + to.x) / 2}%`, "--my": `${(from.y + to.y) / 2}%` })}
       >
-        <img loading="lazy" src="/vox/tape-3.webp" alt="" width={800} height={119} className="vx-tape vx-map-tape vx-map-tape--left" />
-        <img loading="lazy" src="/vox/tape-2.webp" alt="" width={800} height={164} className="vx-tape vx-map-tape vx-map-tape--right" />
+        <img loading="lazy" {...tapeImage("/vox/tape-3.webp")} alt="" width={800} height={119} className="vx-tape vx-map-tape vx-map-tape--left" />
+        <img loading="lazy" {...tapeImage("/vox/tape-2.webp")} alt="" width={800} height={164} className="vx-tape vx-map-tape vx-map-tape--right" />
         <img loading="lazy" src={map.src} alt={map.alt} width={map.width} height={map.height} className="vx-map-img" />
 
         {/* Centre of the wide shot: the map's middle, or between the pins on phones. */}

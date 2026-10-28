@@ -12,6 +12,19 @@ export function win(a: number, b: number, extra?: Record<string, string | number
   return { "--a": a, "--b": b, ...extra } as CSSProperties;
 }
 
+/**
+ * Image props for a tape strip. Tapes show at most ~120 CSS px wide on
+ * phones and ~260px elsewhere, so the 400px copies cover phones and 1x
+ * screens, and sharper screens get the 800px originals.
+ */
+export function tapeImage(src: string) {
+  return {
+    src,
+    srcSet: `${src.replace(/\.webp$/, "-400.webp")} 400w, ${src} 800w`,
+    sizes: "(max-width: 40rem) 30vw, 260px",
+  };
+}
+
 type StickerLink = { label: string; href: string };
 
 /** The sticker link that ends a chapter, pointing to its real page. */
